@@ -484,7 +484,7 @@ func GzipEncoding() Encoding {
 				return nil, err
 			}
 
-			return res.Bytes(), nil
+			return append([]byte{}, res.Bytes()...), nil
 		},
 	}
 }
