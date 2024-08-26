@@ -405,3 +405,26 @@ func TestServer_ServeHTTP_FSPrefix(t *testing.T) {
 		assert.Equal(t, found, s.Found(req))
 	}
 }
+
+func TestServer_ServeHTTP_FileHash(t *testing.T) {
+	s := statigz.FileServer(v, brotli.AddEncoding)
+
+	for u, expectedHash := range map[string]string{
+		"/testdata/favicon.png":         "2gvz0468eeyyy",
+		"testdata/favicon.png":          "2gvz0468eeyyy",
+		"/testdata/nonexistent":         "",
+		"/testdata/swagger.json":        "1bp69hxb9nd93",
+		"/testdata/deeper/swagger.json": "3b88egjdndqox",
+		"/testdata/deeper/openapi.json": "oezz2unsy677",
+		"/testdata/":                    "",
+	} {
+		hash, found := s.FileHash(u)
+		if expectedHash == "" {
+			assert.False(t, found)
+			assert.Equal(t, "", hash)
+		} else {
+			assert.True(t, found)
+			assert.Equal(t, expectedHash, hash)
+		}
+	}
+}

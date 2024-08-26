@@ -426,6 +426,27 @@ func (s *Server) Found(req *http.Request) bool {
 	return false
 }
 
+func (s *Server) FileHash(fn string) (string, bool) {
+	fn = strings.TrimPrefix(fn, "/")
+	// Look for uncompressed data.
+	if info, found := s.info[fn]; found {
+		if info.isDir {
+			return "", false
+		}
+		return info.hash, found
+	}
+
+	// Look for pre-compressed data.
+	for _, enc := range s.Encodings {
+		if info, found := s.info[fn+enc.FileExt]; found {
+			return info.hash, found
+		}
+	}
+
+	// Not found
+	return "", false
+}
+
 // Encoding describes content encoding.
 type Encoding struct {
 	// FileExt is an extension of file with compressed content, for example ".gz".
